@@ -1,0 +1,148 @@
+import { useEffect, useState } from "react";
+import { actualizarProducto, borrarCompra, borrarTransaccionesConCondicion, guardarMovimiento, obtenerCompras, obtenerProducto } from "../firebase";
+import { useModal } from "../context/ModalConfirmProvider";
+import { useAuth } from "../context/AuthContext";
+import { ROLES } from "../constantes";
+
+function PaginaCompras(){
+    const [total, setTotal] = useState(0);
+    const [compras, setCompras] = useState(null);
+
+    const { abrirModal, cerrarModal } = useModal();
+    const { usuario } = useAuth();
+
+    useEffect(() => {
+        // Se suscribe al evento "obtenerCompras" y con el callback guardamos los datos
+        // Nos devuelve una función para desuscribirnos
+        let unsubscribe;
+        const obtenerComprasDB = async () => {
+            unsubscribe = await obtenerCompras(async (docs) => {
+                let precioCompraTotal = 0;
+
+                // Por cada compra, calculamos los totales para la tabla
+                let documentos = docs.map(async doc => {
+                    let precioCompra = doc.cantidad * doc.precio_compra;
+
+                    // Este total es para mostrar el total de todas las compras en la tabla
+                    precioCompraTotal += precioCompra;
+
+                    // El nombre sí lo obtenemos desde el producto porque puede que haya cambiado de nombre
+                    let { nombre } = await obtenerProducto(doc.id_producto);
+
+                    return {
+                        ...doc,
+                        nombre,
+                        total: precioCompra
+                    }
+                })
+
+                documentos = await Promise.all(documentos);
+    
+                setCompras(documentos);
+                setTotal(precioCompraTotal);
+            });
+        }
+        obtenerComprasDB();
+
+        // Se desuscribe del evento al desmontar el componente
+        return () => {
+            if(unsubscribe) unsubscribe();
+        }
+    }, [])
+
+    const handleBorrar = ({ id, id_producto, nombre, cantidad, precio_compra }) => {
+        abrirModal({
+            texto: "¿Quieres borrar la compra?",
+            onResult: async (res) => {
+                if(res){
+                    await borrarCompra(id);
+
+                    await guardarMovimiento(`${usuario.nombre} borró la compra de "${nombre} - cantidad: ${cantidad} - precio: $${precio_compra * cantidad}"`);
+
+                    // Actualizar el producto para que se reste la cantidad si ya no existe esa compra
+                    let producto = await obtenerProducto(id_producto);
+
+                    if(producto){
+                        await actualizarProducto({
+                            ...producto,
+                            cantidad: parseInt(producto.cantidad) - parseInt(cantidad)
+                        });
+                    }
+
+                    // Borrar transacciones relacionadas a la compra
+                    await borrarTransaccionesConCondicion(["id_compra", "==", id]);
+                }
+
+                cerrarModal();
+            }
+        });
+    }
+
+    if(compras === null) return <h2 className="titulo contenedor">Cargando...</h2>
+
+    if(compras.length <= 0) return <h2 className="titulo contenedor">No hay compras</h2>
+
+    return(
+        <>
+            <h1 className="titulo contenedor">Compras</h1>
+
+            <div className="contenedor">
+                <table className="tabla">
+                    <thead className="tabla__titulos">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Cantidad</th>
+                            <th>Precio compra total</th>
+                            <th></th>
+                            {
+                                usuario.rol == ROLES.ADMIN && (
+                                    <th>Creador</th>
+                                )
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            compras.map(compra => (
+                                <tr className="tabla__fila" key={compra.id}>
+                                    <td>{compra.nombre}</td>
+                                    <td>{compra.fecha}</td>
+                                    <td>{compra.cantidad}</td>
+                                    <td className="tabla__precio">${compra.total}</td>
+                                    
+                                    {
+                                        <td><button className="tabla__boton boton" onClick={() => handleBorrar(compra)}>Borrar</button></td>
+                                    }
+                                    
+                                    {
+                                        usuario.rol == ROLES.ADMIN && (
+                                            <td>{compra.creador || "-"}</td>
+                                        )
+                                    }
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+
+                    <tfoot className="tabla__footer">
+                        <tr>
+                            <td>Total</td>
+                            <td></td>
+                            <td></td>
+                            <td className="tabla__precio">${total}</td>
+                            <td></td>
+                            {
+                                usuario.rol == ROLES.ADMIN && (
+                                    <td></td>
+                                )
+                            }
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </>
+    )
+}
+
+export default PaginaCompras;
