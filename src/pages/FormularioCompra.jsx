@@ -56,7 +56,7 @@ function FormularioCompras(){
             id_compra: docCompra.id
         });
 
-        await guardarMovimiento(`${usuario.nombre} registró una compra de ${compra.cantidad} productos (${compra.nombre})`);
+        await guardarMovimiento(`${usuario.nombre} registró una compra de ${compra.cantidad} productos (${nuevoProducto.nombre})`);
 
         navigate("/compras");
     }

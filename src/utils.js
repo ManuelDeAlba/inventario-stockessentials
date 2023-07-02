@@ -1,5 +1,10 @@
 const ACENTOS = {'á':'a','é':'e','í':'i','ó':'o','ú':'u'};
 
+export function timestampAFecha(timestamp){
+    let fecha = new Date(timestamp.toDate());
+    return obtenerFecha(fecha);
+}
+
 export function obtenerFecha(fecha=new Date()){
     let date = fecha;
     let dia = date.getDate().toString().padStart(2, 0);

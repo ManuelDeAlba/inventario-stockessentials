@@ -3,6 +3,7 @@ import { obtenerVentas, borrarVenta, guardarMovimiento, borrarTransaccionesConCo
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
+import { timestampAFecha } from "../utils";
 
 function PaginaVentas(){
     const [descuentos, setDescuentos] = useState(0);
@@ -102,7 +103,10 @@ function PaginaVentas(){
                             <th></th>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <th>Creador</th>
+                                    <>
+                                        <th>Creador</th>
+                                        <th>ID</th>
+                                    </>
                                 )
                             }
                         </tr>
@@ -112,7 +116,7 @@ function PaginaVentas(){
                             ventas.map(venta => (
                                 <tr className="tabla__fila" key={venta.id}>
                                     <td>{venta.nombre}</td>
-                                    <td>{venta.fecha}</td>
+                                    <td>{timestampAFecha(venta.fecha)}</td>
                                     <td>{venta.cantidad}</td>
                                     <td className="tabla__precio">${venta.total + venta.descuento}</td>
                                     <td className="tabla__precio">${venta.descuento}</td>
@@ -125,7 +129,10 @@ function PaginaVentas(){
 
                                     {
                                         usuario.rol == ROLES.ADMIN && (
-                                            <td>{venta.creador || "-"}</td>
+                                            <>
+                                                <td>{venta.creador || "-"}</td>
+                                                <td>{venta.id}</td>
+                                            </>
                                         )
                                     }
                                 </tr>
@@ -145,7 +152,10 @@ function PaginaVentas(){
                             <td></td>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <td></td>
+                                    <>
+                                        <td></td>
+                                        <td></td>
+                                    </>
                                 )
                             }
                         </tr>

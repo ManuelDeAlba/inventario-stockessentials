@@ -112,6 +112,7 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                     <th>Última modificación</th>
                                     <th>Último precio compra</th>
                                     <th>Último precio venta</th>
+                                    <th>ID</th>
                                 </>
                             )
                         }
@@ -147,6 +148,7 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                             <td>{producto.ultima_modificacion || "-"}</td>
                                             <td className="tabla__precio">${producto.ultimo_precio_compra || "-"}</td>
                                             <td className="tabla__precio">${producto.ultimo_precio_venta || "-"}</td>
+                                            <td>{producto.id}</td>
                                         </>
                                     )
                                 }
@@ -180,6 +182,7 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                 {
                                     usuario.rol == ROLES.ADMIN && (
                                         <>
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>

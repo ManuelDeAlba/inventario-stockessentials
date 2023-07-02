@@ -3,6 +3,7 @@ import { borrarTransaccion, guardarMovimiento, guardarTransaccion, obtenerTransa
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
+import { timestampAFecha } from "../utils";
 
 function PaginaIngresosEgresos(){
     const { usuario } = useAuth();
@@ -163,7 +164,8 @@ function PaginaIngresosEgresos(){
                                                         usuario.rol == ROLES.ADMIN && (
                                                             <>
                                                                 <th>Creador</th>
-                                                                <th></th>
+                                                                <th>Acción</th>
+                                                                <th>ID</th>
                                                             </>
                                                         )
                                                     }
@@ -174,7 +176,7 @@ function PaginaIngresosEgresos(){
                                                     ingresos.map(ingreso => (
                                                         <tr className="tabla__fila" key={ingreso.id}>
                                                             <td>{ingreso.descripcion}</td>
-                                                            <td>{ingreso.fecha}</td>
+                                                            <td>{timestampAFecha(ingreso.fecha)}</td>
                                                             <td className="tabla__precio">${ingreso.dinero}</td>
                                                             {
                                                                 usuario.rol == ROLES.ADMIN && (
@@ -187,6 +189,7 @@ function PaginaIngresosEgresos(){
                                                                                 <td>-</td>
                                                                             )
                                                                         }
+                                                                        <td>{ingreso.id}</td>
                                                                     </>
                                                                 )
                                                             }
@@ -221,7 +224,8 @@ function PaginaIngresosEgresos(){
                                                     usuario.rol == ROLES.ADMIN && (
                                                         <>
                                                             <th>Creador</th>
-                                                            <th></th>
+                                                            <th>Acción</th>
+                                                            <th>ID</th>
                                                         </>
                                                     )
                                                 }
@@ -232,7 +236,7 @@ function PaginaIngresosEgresos(){
                                                 egresos.map(egreso => (
                                                     <tr className="tabla__fila" key={egreso.id}>
                                                         <td>{egreso.descripcion}</td>
-                                                        <td>{egreso.fecha}</td>
+                                                        <td>{timestampAFecha(egreso.fecha)}</td>
                                                         <td className="tabla__precio">${Math.abs(egreso.dinero)}</td>
                                                         {
                                                             usuario.rol == ROLES.ADMIN && (
@@ -245,6 +249,7 @@ function PaginaIngresosEgresos(){
                                                                                 <td>-</td>
                                                                             )
                                                                         }
+                                                                        <td>{egreso.id}</td>
                                                                     </>
                                                             )
                                                         }
@@ -262,7 +267,9 @@ function PaginaIngresosEgresos(){
                 </div>
                 
                 <h3 className="titulo" style={{
-                    color: totales.totalIng - totales.totalEgr > 0 ? "green" : "red"
+                    color: totales.totalIng - totales.totalEgr > 0 ? "green" : (
+                        totales.totalIng - totales.totalEgr < 0 ? "red" : "black"
+                    )
                 }}>Caja: ${totales.totalIng - totales.totalEgr}</h3>
             </div>
         </>

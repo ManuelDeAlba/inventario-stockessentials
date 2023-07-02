@@ -59,7 +59,7 @@ function FormularioVenta(){
             id_venta: docVenta.id
         });
 
-        await guardarMovimiento(`${usuario.nombre} registró una venta de ${venta.cantidad} productos (${venta.nombre}) con descuento de $${venta.descuento}`);
+        await guardarMovimiento(`${usuario.nombre} registró una venta de ${venta.cantidad} productos (${nuevoProducto.nombre}) con descuento de $${venta.descuento}`);
 
         navigate("/ventas");
     }

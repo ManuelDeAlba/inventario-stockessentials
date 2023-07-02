@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { obtenerMovimientos } from "../firebase";
+import { timestampAFecha } from "../utils";
 
 function PaginaMovimientos(){
     const [movimientos, setMovimientos] = useState(null);
@@ -26,10 +27,13 @@ function PaginaMovimientos(){
     return(
         <>
             <h1 className="titulo contenedor">Movimientos</h1>
+
+            <p className="contenedor"><b>Movimientos:</b> {movimientos.length}</p>
+
             <div className="contenedor movimientos">
                 {
                     movimientos.map(movimiento => (
-                        <p key={movimiento.id}><b>({movimiento.fecha})</b> {movimiento.msg}</p>
+                        <p key={movimiento.id}><b>({timestampAFecha(movimiento.fecha)})</b> {movimiento.msg}</p>
                     ))
                 }
             </div>

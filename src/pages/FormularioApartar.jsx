@@ -72,7 +72,7 @@ function FormularioApartar(){
 
             await guardarApartado(doc);
 
-            await guardarMovimiento(`${usuario.nombre} registró un apartado de ${doc.cantidad} productos (${doc.nombre}) para ${doc.nombre_persona} con un total de $${doc.precio_venta * doc.cantidad} con descuento de $${doc.descuento}`);
+            await guardarMovimiento(`${usuario.nombre} registró un apartado de ${doc.cantidad} productos (${prod.nombre}) para ${doc.nombre_persona} con un total de $${doc.precio_venta * doc.cantidad} con descuento de $${doc.descuento}`);
 
             e.target.reset();
 

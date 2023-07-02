@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
-import { obtenerFecha } from "../utils";
+import { obtenerFecha, timestampAFecha } from "../utils";
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
@@ -72,7 +72,10 @@ function PaginaApartados(){
                         descuento: apartado.descuento,
                         nombre: apartado.nombre,
                         precio_compra: apartado.precio_compra,
-                        precio_venta: apartado.precio_venta
+                        precio_venta: apartado.precio_venta,
+
+                        //? Solo lo puede ver el admin
+                        creador: usuario.nombre
                     }
                     
                     let docVenta = await guardarVenta(venta);
@@ -144,7 +147,10 @@ function PaginaApartados(){
                             <th></th>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <th>Creador</th>
+                                    <>
+                                        <th>Creador</th>
+                                        <th>ID</th>
+                                    </>
                                 )
                             }
                         </tr>
@@ -154,7 +160,7 @@ function PaginaApartados(){
                             apartados.map(apartado => (
                                 <tr className="tabla__fila" key={apartado.id}>
                                     <td>{apartado.nombre}</td>
-                                    <td>{apartado.fecha}</td>
+                                    <td>{timestampAFecha(apartado.fecha)}</td>
                                     <td>{apartado.nombre_persona}</td>
                                     <td>{apartado.telefono_persona || "-"}</td>
                                     <td>{apartado.cantidad}</td>
@@ -172,7 +178,10 @@ function PaginaApartados(){
 
                                     {
                                         usuario.rol == ROLES.ADMIN && (
-                                            <td>{apartado.creador || "-"}</td>
+                                            <>
+                                                <td>{apartado.creador || "-"}</td>
+                                                <td>{apartado.id}</td>
+                                            </>
                                         )
                                     }
                                 </tr>
@@ -195,7 +204,10 @@ function PaginaApartados(){
                             <td></td>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <td></td>
+                                    <>
+                                        <td></td>
+                                        <td></td>
+                                    </>
                                 )
                             }
                         </tr>

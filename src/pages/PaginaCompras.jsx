@@ -3,6 +3,7 @@ import { actualizarProducto, borrarCompra, borrarTransaccionesConCondicion, guar
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
+import { timestampAFecha } from "../utils";
 
 function PaginaCompras(){
     const [total, setTotal] = useState(0);
@@ -97,7 +98,10 @@ function PaginaCompras(){
                             <th></th>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <th>Creador</th>
+                                    <>
+                                        <th>Creador</th>
+                                        <th>ID</th>
+                                    </>
                                 )
                             }
                         </tr>
@@ -107,7 +111,7 @@ function PaginaCompras(){
                             compras.map(compra => (
                                 <tr className="tabla__fila" key={compra.id}>
                                     <td>{compra.nombre}</td>
-                                    <td>{compra.fecha}</td>
+                                    <td>{timestampAFecha(compra.fecha)}</td>
                                     <td>{compra.cantidad}</td>
                                     <td className="tabla__precio">${compra.total}</td>
                                     
@@ -117,7 +121,10 @@ function PaginaCompras(){
                                     
                                     {
                                         usuario.rol == ROLES.ADMIN && (
-                                            <td>{compra.creador || "-"}</td>
+                                            <>
+                                                <td>{compra.creador || "-"}</td>
+                                                <td>{compra.id}</td>
+                                            </>
                                         )
                                     }
                                 </tr>
@@ -134,7 +141,10 @@ function PaginaCompras(){
                             <td></td>
                             {
                                 usuario.rol == ROLES.ADMIN && (
-                                    <td></td>
+                                    <>
+                                        <td></td>
+                                        <td></td>
+                                    </>
                                 )
                             }
                         </tr>
