@@ -76,7 +76,7 @@ function PaginaInicio(){
             await actualizarProducto(prod);
 
             // Se guarda el movimiento en la base de datos
-            await guardarMovimiento(`${usuario.nombre} editó el producto "${prod.nombre}"`);
+            await guardarMovimiento(`${usuario.nombre} editó el producto "${prod.nombre}" - ultimo_precio_compra: $${producto.ultimo_precio_compra} - ultimo_precio_venta: $${producto.ultimo_precio_venta}`);
         }
 
         e.target.querySelector(".form__input").focus();

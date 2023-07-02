@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, orderBy, query, setDoc, where } from "firebase/firestore";
-import { obtenerFecha } from "./utils";
+import { obtenerTimestamp } from "./utils";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -189,7 +189,7 @@ export async function guardarMovimiento(msg){
 
     let docMensaje = {
         id: fecha,
-        fecha: obtenerFecha(),
+        fecha: obtenerTimestamp(),
         msg
     }
 
@@ -211,7 +211,7 @@ export async function guardarTransaccion(datos){
 
     let docTransaccion = {
         id: fecha,
-        fecha: obtenerFecha(),
+        fecha: obtenerTimestamp(),
         ...datos
     }
 

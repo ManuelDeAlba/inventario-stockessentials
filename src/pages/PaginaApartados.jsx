@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
-import { obtenerFecha, timestampAFecha } from "../utils";
+import { obtenerTimestamp, timestampAFecha } from "../utils";
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
@@ -67,7 +67,7 @@ function PaginaApartados(){
                     // Pasar los datos a la venta
                     let venta = {
                         id_producto: apartado.id_producto,
-                        fecha: obtenerFecha(new Date()),
+                        fecha: obtenerTimestamp(),
                         cantidad: apartado.cantidad,
                         descuento: apartado.descuento,
                         nombre: apartado.nombre,

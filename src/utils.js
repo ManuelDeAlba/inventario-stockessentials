@@ -1,9 +1,6 @@
-const ACENTOS = {'á':'a','é':'e','í':'i','ó':'o','ú':'u'};
+import { Timestamp } from "firebase/firestore";
 
-export function timestampAFecha(timestamp){
-    let fecha = new Date(timestamp.toDate());
-    return obtenerFecha(fecha);
-}
+const ACENTOS = {'á':'a','é':'e','í':'i','ó':'o','ú':'u'};
 
 export function obtenerFecha(fecha=new Date()){
     let date = fecha;
@@ -16,6 +13,15 @@ export function obtenerFecha(fecha=new Date()){
     let segundos = date.getSeconds().toString().padStart(2, 0);
     
     return `${dia}/${mes}/${anio} ${hora}:${minutos}:${segundos}`;
+}
+
+export function timestampAFecha(timestamp){
+    let fecha = new Date(timestamp.toDate());
+    return obtenerFecha(fecha);
+}
+
+export function obtenerTimestamp(fecha=new Date()){
+    return Timestamp.fromDate(fecha);
 }
 
 export function eliminarAcentos(str){

@@ -53,7 +53,7 @@ function PaginaCompras(){
 
     const handleBorrar = ({ id, id_producto, nombre, cantidad, precio_compra }) => {
         abrirModal({
-            texto: "¿Quieres borrar la compra?",
+            texto: "¿Quieres borrar la compra? (Se descontará del inventario)",
             onResult: async (res) => {
                 if(res){
                     await borrarCompra(id);
