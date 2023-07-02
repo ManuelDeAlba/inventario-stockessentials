@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { obtenerVentas, borrarVenta, guardarMovimiento, borrarTransaccionesConCondicion, obtenerProducto } from "../firebase";
+import { obtenerVentas, borrarVenta, guardarMovimiento, borrarTransaccionesConCondicion, obtenerProducto, actualizarProducto } from "../firebase";
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
@@ -63,14 +63,24 @@ function PaginaVentas(){
         }
     }, [])
 
-    const handleBorrar = ({ id, nombre, cantidad, precio_compra, precio_venta, descuento }) => {
+    const handleBorrar = ({ id, id_producto, nombre, cantidad, precio_compra, precio_venta, descuento }) => {
         abrirModal({
-            texto: "¿Quieres borrar la venta?",
+            texto: "¿Quieres borrar la venta? (Se regresarán los productos al inventario)",
             onResult: async (res) => {
                 if(res){
                     await borrarVenta(id);
 
                     await guardarMovimiento(`${usuario.nombre} borró la venta de "${nombre} - cantidad: ${cantidad} - descuento: $${descuento} - total: $${precio_venta * cantidad - descuento} - ganancia: $${(precio_venta - precio_compra) * cantidad - descuento}"`);
+
+                    // Actualizar el producto para que se regrese la cantidad al inventario
+                    let producto = await obtenerProducto(id_producto);
+
+                    if(producto){
+                        await actualizarProducto({
+                            ...producto,
+                            cantidad: parseInt(producto.cantidad) + parseInt(cantidad)
+                        });
+                    }
 
                     // Borrar transacciones relacionadas a la venta
                     await borrarTransaccionesConCondicion(["id_venta", "==", id]);
