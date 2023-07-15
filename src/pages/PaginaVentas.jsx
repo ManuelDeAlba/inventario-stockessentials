@@ -116,6 +116,7 @@ function PaginaVentas(){
                                     <>
                                         <th>Creador</th>
                                         <th>ID</th>
+                                        <th>Nombre persona</th>
                                     </>
                                 )
                             }
@@ -142,6 +143,7 @@ function PaginaVentas(){
                                             <>
                                                 <td>{venta.creador || "-"}</td>
                                                 <td>{venta.id}</td>
+                                                <td>{venta.nombre_persona || "-"}</td>
                                             </>
                                         )
                                     }
@@ -163,6 +165,7 @@ function PaginaVentas(){
                             {
                                 usuario.rol == ROLES.ADMIN && (
                                     <>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                     </>

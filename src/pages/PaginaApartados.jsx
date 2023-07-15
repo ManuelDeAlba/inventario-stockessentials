@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
-import { obtenerTimestamp, timestampAFecha } from "../utils";
+import { timestampAFecha } from "../utils";
 import { useModal } from "../context/ModalConfirmProvider";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
@@ -67,7 +67,6 @@ function PaginaApartados(){
                     // Pasar los datos a la venta
                     let venta = {
                         id_producto: apartado.id_producto,
-                        fecha: obtenerTimestamp(),
                         cantidad: apartado.cantidad,
                         descuento: apartado.descuento,
                         nombre: apartado.nombre,
@@ -75,7 +74,8 @@ function PaginaApartados(){
                         precio_venta: apartado.precio_venta,
 
                         //? Solo lo puede ver el admin
-                        creador: usuario.nombre
+                        creador: usuario.nombre,
+                        nombre_persona: apartado.nombre_persona
                     }
                     
                     let docVenta = await guardarVenta(venta);

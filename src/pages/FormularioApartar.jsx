@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { actualizarProducto, guardarApartado, guardarMovimiento, obtenerProductos } from "../firebase";
-import { obtenerTimestamp } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -52,7 +51,6 @@ function FormularioApartar(){
             // Documento de apartado
             let doc = {
                 id_producto: prod.id, // Se guarda el id del producto para poder borrarlo
-                fecha: obtenerTimestamp(),
                 nombre_persona: data.nombre,
                 telefono_persona: data.telefono,
                 cantidad: valor,

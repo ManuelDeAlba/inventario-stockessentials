@@ -102,6 +102,7 @@ export async function guardarCompra(compra){
 
     let docCompra = {
         id: fecha,
+        fecha: obtenerTimestamp(),
         ...compra
     }
 
@@ -131,6 +132,7 @@ export async function guardarVenta(venta){
 
     let docVenta = {
         id: fecha,
+        fecha: obtenerTimestamp(),
         ...venta
     }
 
@@ -160,6 +162,7 @@ export async function guardarApartado(apartado){
 
     let docApartado = {
         id: fecha,
+        fecha: obtenerTimestamp(),
         ...apartado
     }
 

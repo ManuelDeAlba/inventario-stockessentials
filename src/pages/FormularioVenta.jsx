@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { obtenerProducto, actualizarProducto, guardarVenta, guardarMovimiento, guardarTransaccion } from "../firebase";
 
-import TablaProductos from "../components/TablaProductos";
-import { obtenerTimestamp } from "../utils";
 import { useAuth } from "../context/AuthContext";
+import TablaProductos from "../components/TablaProductos";
 
 function FormularioVenta(){
     let { id } = useParams();
@@ -41,7 +40,6 @@ function FormularioVenta(){
         // Se guarda la venta en la db para mostrar la tabla
         let venta = {
             id_producto: nuevoProducto.id,
-            fecha: obtenerTimestamp(),
             cantidad,
             descuento,
             precio_compra: nuevoProducto.precio_compra,
