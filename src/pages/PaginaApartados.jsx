@@ -30,7 +30,7 @@ function PaginaApartados(){
                 let documentos = docs.map(async doc => {
                     totalSinDescuento += doc.precio_venta * doc.cantidad;
                     totalDescuentos += doc.descuento;
-                    totalGanancia += (doc.precio_venta - doc.precio_compra) * doc.cantidad;
+                    totalGanancia += ((doc.precio_venta - doc.precio_compra) * doc.cantidad) - doc.descuento;
 
                     // El nombre sí lo obtenemos desde el producto porque puede que haya cambiado de nombre
                     let { nombre } = await obtenerProducto(doc.id_producto);
