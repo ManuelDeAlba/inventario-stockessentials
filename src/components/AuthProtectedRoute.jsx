@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
 import { useNavigate } from "react-router-dom";
 
 function AuthProtectedRoute({ children, admin }){
     const navigate = useNavigate();
-
+    const inputContrasena = useRef(null);
+    
     const [contrasena, setContrasena] = useState(null);
 
     const { permitido, error, iniciarSesion, usuario } = useAuth();
@@ -16,6 +17,11 @@ function AuthProtectedRoute({ children, admin }){
         // Se intenta iniciar sesión, si se permite o si hay un error, se actualiza el contexto
         await iniciarSesion(contrasena);
     }
+    
+    useEffect(() => {
+        // Al cargar la página se pone el focus en el input
+        inputContrasena.current.focus();
+    }, [])
 
     useEffect(() => {
         // Si ya existe el usuario y se pide que sea admin y no lo es, llevar a inicio
@@ -33,7 +39,14 @@ function AuthProtectedRoute({ children, admin }){
 
                 <div className="form__apartado">
                     <label htmlFor="contrasena">Contraseña</label>
-                    <input type="password" className="form__input" name="contrasena" id="contrasena" onInput={(e) => setContrasena(e.target.value)} />
+                    <input
+                        type="password"
+                        className="form__input"
+                        name="contrasena"
+                        id="contrasena"
+                        onInput={(e) => setContrasena(e.target.value)}
+                        ref={inputContrasena}
+                    />
                 </div>
 
                 <p style={{ color: "#f00" }}>{error}</p>
