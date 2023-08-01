@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
-import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
-import { timestampAFecha } from "../utils";
-import { useModal } from "../context/ModalConfirmProvider";
+
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
+import { useModal } from "../context/ModalConfirmProvider";
+
+import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
+import { filtrarProductos, timestampAFecha } from "../utils";
+
+import Filtro from "../components/Filtro";
 
 function PaginaApartados(){
-    const [apartados, setApartados] = useState(null);
     const [totales, setTotales] = useState({
         totalSinDescuento: 0,
         totalDescuentos: 0,
         totalGanancia: 0
     });
+    const [apartados, setApartados] = useState(null);
+    const [apartadosFiltrados, setApartadosFiltrados] = useState(apartados);
 
     const { abrirModal, cerrarModal } = useModal();
     const { usuario } = useAuth();
@@ -58,6 +63,25 @@ function PaginaApartados(){
             if(unsubscribe) unsubscribe();
         }
     }, [])
+
+    const handleApartadosFiltrados = filtrados => {
+        let totalSinDescuento = 0;
+        let totalDescuentos = 0;
+        let totalGanancia = 0;
+
+        filtrados.forEach(filtrado => {
+            totalSinDescuento += filtrado.precio_venta * filtrado.cantidad;
+            totalDescuentos += filtrado.descuento;
+            totalGanancia += ((filtrado.precio_venta - filtrado.precio_compra) * filtrado.cantidad) - filtrado.descuento;
+        })
+
+        setTotales({
+            totalSinDescuento,
+            totalDescuentos,
+            totalGanancia
+        });
+        setApartadosFiltrados(filtrados);
+    }
 
     const handleCompletar = async (apartado) => {
         abrirModal({
@@ -131,88 +155,102 @@ function PaginaApartados(){
             <h1 className="titulo contenedor">Apartados</h1>
 
             <div className="contenedor">
-            <table className="tabla">
-                    <thead className="tabla__titulos">
-                        <tr>
-                            <th>Producto</th>
-                            <th>Fecha</th>
-                            <th>Nombre</th>
-                            <th>Telefono</th>
-                            <th>Cantidad</th>
-                            <th>Total sin descuento</th>
-                            <th>Descuento</th>
-                            <th>Total</th>
-                            <th>Ganancia</th>
-                            <th></th>
-                            <th></th>
-                            {
-                                usuario.rol == ROLES.ADMIN && (
-                                    <>
-                                        <th>Creador</th>
-                                        <th>ID</th>
-                                    </>
-                                )
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            apartados.map(apartado => (
-                                <tr className="tabla__fila" key={apartado.id}>
-                                    <td>{apartado.nombre}</td>
-                                    <td>{timestampAFecha(apartado.fecha)}</td>
-                                    <td>{apartado.nombre_persona}</td>
-                                    <td>{apartado.telefono_persona || "-"}</td>
-                                    <td>{apartado.cantidad}</td>
-                                    <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
-                                    <td className="tabla__precio">${apartado.descuento}</td>
-                                    <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta - apartado.descuento}</td>
-                                    <td className="tabla__precio">${(apartado.precio_venta - apartado.precio_compra) * apartado.cantidad - apartado.descuento}</td>
-                                    
-                                    {
-                                        <>
-                                            <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
-                                            <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
-                                        </>
-                                    }
+                <Filtro
+                    elementos={apartados}
+                    handleElementosFiltrados={handleApartadosFiltrados}
+                    funcionFiltro={filtrarProductos}
+                />
 
+                {
+                    apartadosFiltrados?.length > 0 ? (
+                        <table className="tabla">
+
+                            <thead className="tabla__titulos">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Fecha</th>
+                                    <th>Nombre</th>
+                                    <th>Telefono</th>
+                                    <th>Cantidad</th>
+                                    <th>Total sin descuento</th>
+                                    <th>Descuento</th>
+                                    <th>Total</th>
+                                    <th>Ganancia</th>
+                                    <th></th>
+                                    <th></th>
                                     {
                                         usuario.rol == ROLES.ADMIN && (
                                             <>
-                                                <td>{apartado.creador || "-"}</td>
-                                                <td>{apartado.id}</td>
+                                                <th>Creador</th>
+                                                <th>ID</th>
                                             </>
                                         )
                                     }
                                 </tr>
-                            ))
-                        }
-                    </tbody>
+                            </thead>
+                            <tbody>
+                                {
+                                    apartadosFiltrados.map(apartado => (
+                                        <tr className="tabla__fila" key={apartado.id}>
+                                            <td>{apartado.nombre}</td>
+                                            <td>{timestampAFecha(apartado.fecha)}</td>
+                                            <td>{apartado.nombre_persona}</td>
+                                            <td>{apartado.telefono_persona || "-"}</td>
+                                            <td>{apartado.cantidad}</td>
+                                            <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
+                                            <td className="tabla__precio">${apartado.descuento}</td>
+                                            <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta - apartado.descuento}</td>
+                                            <td className="tabla__precio">${(apartado.precio_venta - apartado.precio_compra) * apartado.cantidad - apartado.descuento}</td>
+                                            
+                                            {
+                                                <>
+                                                    <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
+                                                    <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
+                                                </>
+                                            }
 
-                    <tfoot className="tabla__footer">
-                        <tr>
-                            <td>Total</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td className="tabla__precio">${totales.totalSinDescuento}</td>
-                            <td className="tabla__precio">${totales.totalDescuentos}</td>
-                            <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos}</td>
-                            <td className="tabla__precio">${totales.totalGanancia}</td>
-                            <td></td>
-                            <td></td>
-                            {
-                                usuario.rol == ROLES.ADMIN && (
-                                    <>
-                                        <td></td>
-                                        <td></td>
-                                    </>
-                                )
-                            }
-                        </tr>
-                    </tfoot>
-                </table>
+                                            {
+                                                usuario.rol == ROLES.ADMIN && (
+                                                    <>
+                                                        <td>{apartado.creador || "-"}</td>
+                                                        <td>{apartado.id}</td>
+                                                    </>
+                                                )
+                                            }
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+
+                            <tfoot className="tabla__footer">
+                                <tr>
+                                    <td>Total</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td className="tabla__precio">${totales.totalSinDescuento}</td>
+                                    <td className="tabla__precio">${totales.totalDescuentos}</td>
+                                    <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos}</td>
+                                    <td className="tabla__precio">${totales.totalGanancia}</td>
+                                    <td></td>
+                                    <td></td>
+                                    {
+                                        usuario.rol == ROLES.ADMIN && (
+                                            <>
+                                                <td></td>
+                                                <td></td>
+                                            </>
+                                        )
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    ) : (
+                        <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
+                    )
+                }
+
             </div>
         </>
     )

@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import { actualizarProducto, guardarApartado, guardarMovimiento, obtenerProductos } from "../firebase";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../context/AuthContext";
+
+import { actualizarProducto, guardarApartado, guardarMovimiento, obtenerProductos } from "../firebase";
+import { filtrarProductos } from "../utils";
+
+import Filtro from "../components/Filtro";
 
 const CLAVES_NO_ITERABLES = ["nombre", "telefono", "descuento"];
 
@@ -9,6 +14,7 @@ function FormularioApartar(){
     const navigate = useNavigate();
 
     const [productos, setProductos] = useState(null);
+    const [productosFiltrados, setProductosFiltrados] = useState(productos);
 
     const { usuario } = useAuth();
 
@@ -20,7 +26,15 @@ function FormularioApartar(){
             });
         }
         obtenerProductosDB();
+
+        return () => {
+            if(unsubscribe) unsubscribe();
+        }
     }, [])
+
+    const handleProductosFiltrados = filtrados => {
+        setProductosFiltrados(filtrados);
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -88,79 +102,94 @@ function FormularioApartar(){
 
             <div className="contenedor">
                 <form className="form" onSubmit={handleSubmit}>
-                    <table className="tabla">
-                        <thead className="tabla__titulos">
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Cantidad</th>
-                                <th>Precio venta</th>
-                                <th></th>
-                            </tr>
-                        </thead>
+                    <Filtro 
+                        elementos={productos}
+                        handleElementosFiltrados={handleProductosFiltrados}
+                        funcionFiltro={filtrarProductos}
+                    />
 
-                        <tbody>
-                            {
-                                productos.map(producto => (
-                                    <tr className="tabla__fila" key={producto.id}>
-                                        <td>{producto.nombre}</td>
-                                        <td>{producto.cantidad}</td>
-                                        <td className="tabla__precio">${producto.precio_venta}</td>
+                    {
+                        productosFiltrados?.length > 0 ? (
+                            <>
+                                <table className="tabla">
+                                    <thead className="tabla__titulos">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio venta</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+            
+                                    <tbody>
                                         {
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    name={producto.id}
-                                                    className="form__input form__input--number"
-                                                    min={0}
-                                                    max={producto.cantidad}
-                                                />
-                                            </td>
+                                            productosFiltrados.map(producto => (
+                                                <tr className="tabla__fila" key={producto.id}>
+                                                    <td>{producto.nombre}</td>
+                                                    <td>{producto.cantidad}</td>
+                                                    <td className="tabla__precio">${producto.precio_venta}</td>
+                                                    {
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                name={producto.id}
+                                                                className="form__input form__input--number"
+                                                                min={0}
+                                                                max={producto.cantidad}
+                                                            />
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            ))
                                         }
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </table>
+                                    </tbody>
+                                </table>
+            
+                                <div className="form__apartado">
+                                    <label htmlFor="nombre">Nombre</label>
+                                    <input
+                                        type="text"
+                                        name="nombre"
+                                        id="nombre"
+                                        className="form__input"
+                                        required
+                                    />
+                                </div>
+            
+                                <div className="form__apartado">
+                                    <label htmlFor="telefono">Telefono</label>
+                                    <input
+                                        type="tel"
+                                        className="form__input"
+                                        name="telefono"
+                                        id="telefono"
+                                        pattern="[0-9]{10}"
+                                        inputMode="tel"
+                                        maxLength={10}
+                                    />
+                                </div>
+            
+                                <div className="form__apartado">
+                                    <label htmlFor="descuento">Descuento</label>
+                                    <input
+                                        type="number"
+                                        className="form__input"
+                                        name="descuento"
+                                        id="descuento"
+                                        min={0}
+                                        defaultValue={0}
+                                        inputMode="numeric"
+                                        required
+                                    />
+                                </div>
+            
+                                <input type="submit" value="Apartar" className="boton form__boton" />
+                            </>
+                        ) : (
+                            <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
+                        )
+                    }
 
-                    <div className="form__apartado">
-                        <label htmlFor="nombre">Nombre</label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            id="nombre"
-                            className="form__input"
-                            required
-                        />
-                    </div>
-
-                    <div className="form__apartado">
-                        <label htmlFor="telefono">Telefono</label>
-                        <input
-                            type="tel"
-                            className="form__input"
-                            name="telefono"
-                            id="telefono"
-                            pattern="[0-9]{10}"
-                            inputMode="tel"
-                            maxLength={10}
-                        />
-                    </div>
-
-                    <div className="form__apartado">
-                        <label htmlFor="descuento">Descuento</label>
-                        <input
-                            type="number"
-                            className="form__input"
-                            name="descuento"
-                            id="descuento"
-                            min={0}
-                            defaultValue={0}
-                            inputMode="numeric"
-                            required
-                        />
-                    </div>
-
-                    <input type="submit" value="Apartar" className="boton form__boton" />
                 </form>
             </div>
         </>

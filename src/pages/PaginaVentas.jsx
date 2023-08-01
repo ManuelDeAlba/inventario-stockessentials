@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { obtenerVentas, borrarVenta, guardarMovimiento, borrarTransaccionesConCondicion, obtenerProducto, actualizarProducto } from "../firebase";
-import { useModal } from "../context/ModalConfirmProvider";
+
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
-import { timestampAFecha } from "../utils";
+import { useModal } from "../context/ModalConfirmProvider";
+
+import { obtenerVentas, borrarVenta, guardarMovimiento, borrarTransaccionesConCondicion, obtenerProducto, actualizarProducto } from "../firebase";
+import { filtrarProductos, timestampAFecha } from "../utils";
+
+import Filtro from "../components/Filtro";
 
 function PaginaVentas(){
-    const [descuentos, setDescuentos] = useState(0);
-    const [total, setTotal] = useState(0);
-    const [ganancia, setGanancia] = useState(0);
+    const [totales, setTotales] = useState({
+        descuentos: 0,
+        total: 0,
+        ganancia: 0
+    });
     const [ventas, setVentas] = useState(null);
+    const [ventasFiltradas, setVentasFiltradas] = useState(ventas);
 
     const { abrirModal, cerrarModal } = useModal();
     const { usuario } = useAuth();
@@ -49,10 +56,12 @@ function PaginaVentas(){
 
                 documentos = await Promise.all(documentos);
     
+                setTotales({
+                    descuentos: descuentosTotales,
+                    total: precioVentaTotal,
+                    ganancia: gananciaTotal
+                });
                 setVentas(documentos);
-                setDescuentos(descuentosTotales);
-                setTotal(precioVentaTotal);
-                setGanancia(gananciaTotal);
             });
         }
         obtenerVentasDB();
@@ -62,6 +71,28 @@ function PaginaVentas(){
             if(unsubscribe) unsubscribe();
         }
     }, [])
+
+    const handleVendasFiltradas = filtradas => {
+        let descuentosTotales = 0;
+        let precioVentaTotal = 0;
+        let gananciaTotal = 0;
+
+        filtradas.forEach(filtrada => {
+            let precioVenta = (filtrada.cantidad * filtrada.precio_venta) - filtrada.descuento;
+            let ganancia = ((filtrada.precio_venta - filtrada.precio_compra) * filtrada.cantidad) - filtrada.descuento;
+
+            descuentosTotales += Number(filtrada.descuento);
+            precioVentaTotal += precioVenta;
+            gananciaTotal += ganancia;
+        })
+
+        setTotales({
+            descuentos: descuentosTotales,
+            total: precioVentaTotal,
+            ganancia: gananciaTotal
+        });
+        setVentasFiltradas(filtradas);
+    }
 
     const handleBorrar = ({ id, id_producto, nombre, cantidad, precio_compra, precio_venta, descuento }) => {
         abrirModal({
@@ -100,80 +131,92 @@ function PaginaVentas(){
             <h1 className="titulo contenedor">Ventas</h1>
 
             <div className="contenedor">
-                <table className="tabla">
-                    <thead className="tabla__titulos">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Fecha</th>
-                            <th>Cantidad</th>
-                            <th>Total sin descuento</th>
-                            <th>Descuento</th>
-                            <th>Total venta</th>
-                            <th>Ganancia</th>
-                            <th></th>
-                            {
-                                usuario.rol == ROLES.ADMIN && (
-                                    <>
-                                        <th>Creador</th>
-                                        <th>ID</th>
-                                        <th>Nombre persona</th>
-                                    </>
-                                )
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            ventas.map(venta => (
-                                <tr className="tabla__fila" key={venta.id}>
-                                    <td>{venta.nombre}</td>
-                                    <td>{timestampAFecha(venta.fecha)}</td>
-                                    <td>{venta.cantidad}</td>
-                                    <td className="tabla__precio">${venta.total + venta.descuento}</td>
-                                    <td className="tabla__precio">${venta.descuento}</td>
-                                    <td className="tabla__precio">${venta.total}</td>
-                                    <td className="tabla__precio">${venta.ganancia}</td>
-                                    
-                                    {
-                                        <td><button className="tabla__boton boton" onClick={() => handleBorrar(venta)}>Borrar</button></td>
-                                    }
+                <Filtro
+                    elementos={ventas}
+                    handleElementosFiltrados={handleVendasFiltradas}
+                    funcionFiltro={filtrarProductos}
+                />
 
+                {
+                    ventasFiltradas?.length > 0 ? (
+                        <table className="tabla">
+                            <thead className="tabla__titulos">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Fecha</th>
+                                    <th>Cantidad</th>
+                                    <th>Total sin descuento</th>
+                                    <th>Descuento</th>
+                                    <th>Total venta</th>
+                                    <th>Ganancia</th>
+                                    <th></th>
                                     {
                                         usuario.rol == ROLES.ADMIN && (
                                             <>
-                                                <td>{venta.creador || "-"}</td>
-                                                <td>{venta.id}</td>
-                                                <td>{venta.nombre_persona || "-"}</td>
+                                                <th>Creador</th>
+                                                <th>ID</th>
+                                                <th>Nombre persona</th>
                                             </>
                                         )
                                     }
                                 </tr>
-                            ))
-                        }
-                    </tbody>
+                            </thead>
+                            <tbody>
+                                {
+                                    ventasFiltradas.map(venta => (
+                                        <tr className="tabla__fila" key={venta.id}>
+                                            <td>{venta.nombre}</td>
+                                            <td>{timestampAFecha(venta.fecha)}</td>
+                                            <td>{venta.cantidad}</td>
+                                            <td className="tabla__precio">${venta.total + venta.descuento}</td>
+                                            <td className="tabla__precio">${venta.descuento}</td>
+                                            <td className="tabla__precio">${venta.total}</td>
+                                            <td className="tabla__precio">${venta.ganancia}</td>
+                                            
+                                            {
+                                                <td><button className="tabla__boton boton" onClick={() => handleBorrar(venta)}>Borrar</button></td>
+                                            }
 
-                    <tfoot className="tabla__footer">
-                        <tr>
-                            <td>Total</td>
-                            <td></td>
-                            <td></td>
-                            <td className="tabla__precio">${total + descuentos}</td>
-                            <td className="tabla__precio">${descuentos}</td>
-                            <td className="tabla__precio">${total}</td>
-                            <td className="tabla__precio">${ganancia}</td>
-                            <td></td>
-                            {
-                                usuario.rol == ROLES.ADMIN && (
-                                    <>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </>
-                                )
-                            }
-                        </tr>
-                    </tfoot>
-                </table>
+                                            {
+                                                usuario.rol == ROLES.ADMIN && (
+                                                    <>
+                                                        <td>{venta.creador || "-"}</td>
+                                                        <td>{venta.id}</td>
+                                                        <td>{venta.nombre_persona || "-"}</td>
+                                                    </>
+                                                )
+                                            }
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+
+                            <tfoot className="tabla__footer">
+                                <tr>
+                                    <td>Total</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td className="tabla__precio">${totales.total + totales.descuentos}</td>
+                                    <td className="tabla__precio">${totales.descuentos}</td>
+                                    <td className="tabla__precio">${totales.total}</td>
+                                    <td className="tabla__precio">${totales.ganancia}</td>
+                                    <td></td>
+                                    {
+                                        usuario.rol == ROLES.ADMIN && (
+                                            <>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </>
+                                        )
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    ) : (
+                        <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
+                    )
+                }
             </div>
         </>
     )
