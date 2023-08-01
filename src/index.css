@@ -176,9 +176,20 @@ body{
   font-family: 'Tsukimi Rounded', sans-serif;
 }
 .form__input--number{ min-width: 100px; }
-.form__boton{
-  align-self: flex-end;
+.form__controles{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
 }
+.form__botones{
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 20px;
+}
+.form__boton{ align-self: flex-end; }
 
 /* TABLA PRODUCTOS */
 .tabla{

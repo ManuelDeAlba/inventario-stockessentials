@@ -118,6 +118,17 @@ function PaginaInicio(){
         })
     }
 
+    const cancelarEdicion = e => {
+        setEditando(false);
+        setProducto({
+            id: "",
+            nombre: "",
+            cantidad: 0,
+            precio_compra: 0,
+            precio_venta: 0
+        });
+    }
+
     return(
         <>
             <h1 className="titulo titulo--principal contenedor">StockEssentials</h1>
@@ -169,13 +180,22 @@ function PaginaInicio(){
                         />
                     </div>
 
-                    {
-                        !editando ? (
-                            <input type="submit" value="Agregar producto" className="boton form__boton" />
-                        ) : (
-                            <input type="submit" value="Editar" className="boton form__boton" />
-                        )
-                    }
+                    <div className="form__controles">
+                        <p><b>Ganancia:</b> ${producto.precio_venta - producto.precio_compra}</p>
+
+                        <div className="form__botones">
+                            {
+                                !editando ? (
+                                    <input type="submit" value="Agregar producto" className="boton form__boton" />
+                                ) : (
+                                    <>
+                                        <button className="boton form__boton" onClick={cancelarEdicion}>Cancelar</button>
+                                        <input type="submit" value="Editar" className="boton form__boton" />
+                                    </>
+                                )
+                            }
+                        </div>
+                    </div>
                 </form>
 
                 {
