@@ -19,6 +19,8 @@ function AuthProtectedRoute({ children, admin }){
     }
     
     useEffect(() => {
+        if(!inputContrasena.current) return;
+        
         // Al cargar la página se pone el focus en el input
         inputContrasena.current.focus();
     }, [])
