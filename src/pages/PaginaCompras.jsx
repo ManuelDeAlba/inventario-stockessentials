@@ -5,7 +5,7 @@ import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
 
 import { actualizarProducto, borrarCompra, borrarTransaccionesConCondicion, guardarMovimiento, obtenerCompras, obtenerProducto } from "../firebase";
-import { filtrarProductos, timestampAFecha } from "../utils";
+import { filtrarElementos, timestampAFecha } from "../utils";
 
 import Filtro from "../components/Filtro";
 
@@ -106,7 +106,7 @@ function PaginaCompras(){
                 <Filtro
                     elementos={compras}
                     handleElementosFiltrados={handleComprasFiltradas}
-                    funcionFiltro={filtrarProductos}
+                    funcionFiltro={filtrarElementos}
                 />
 
                 {

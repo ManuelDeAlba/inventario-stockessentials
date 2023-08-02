@@ -5,7 +5,7 @@ import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
 
 import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
-import { filtrarProductos, timestampAFecha } from "../utils";
+import { filtrarElementos, timestampAFecha } from "../utils";
 
 import Filtro from "../components/Filtro";
 
@@ -158,7 +158,7 @@ function PaginaApartados(){
                 <Filtro
                     elementos={apartados}
                     handleElementosFiltrados={handleApartadosFiltrados}
-                    funcionFiltro={filtrarProductos}
+                    funcionFiltro={filtrarElementos}
                 />
 
                 {

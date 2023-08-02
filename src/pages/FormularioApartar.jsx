@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import { actualizarProducto, guardarApartado, guardarMovimiento, obtenerProductos } from "../firebase";
-import { filtrarProductos } from "../utils";
+import { filtrarElementos } from "../utils";
 
 import Filtro from "../components/Filtro";
 
@@ -105,7 +105,7 @@ function FormularioApartar(){
                     <Filtro 
                         elementos={productos}
                         handleElementosFiltrados={handleProductosFiltrados}
-                        funcionFiltro={filtrarProductos}
+                        funcionFiltro={filtrarElementos}
                     />
 
                     {

@@ -6,7 +6,7 @@ import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
 
 import { borrarProducto, guardarMovimiento } from "../firebase";
-import { filtrarProductos } from "../utils";
+import { filtrarElementos } from "../utils";
 
 import Filtro from "./Filtro";
 
@@ -65,7 +65,7 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                     <Filtro
                         elementos={productos}
                         handleElementosFiltrados={handleProductosFiltrados}
-                        funcionFiltro={filtrarProductos}
+                        funcionFiltro={filtrarElementos}
                     />
                 )
             }
