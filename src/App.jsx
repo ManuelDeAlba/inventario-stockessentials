@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import PaginaInicio from "./pages/PaginaInicio";
 import FormularioVenta from "./pages/FormularioVenta";
@@ -37,6 +37,7 @@ function App(){
                                 </AuthProtectedRoute>}
                             />
                             <Route path="/ingresos-egresos" element={<PaginaIngresosEgresos />} />
+                            <Route path="*" element={<Navigate to="/" />} />
                         </Routes>
                     </AuthProtectedRoute>
                 </ModalConfirmProvider>
