@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +22,14 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
     const { abrirModal, cerrarModal } = useModal();
     const { usuario } = useAuth();
 
+    // Cuando no se usa el filtro, los productos filtrados
+    // también se actualizan al cambiar las props pero con los elementos completos
+    // y se calculan los totales por si se usa conResultados
+    useEffect(() => {
+        if(!conFiltro) handleProductosFiltrados(productos);
+    }, [productos])
+
+    // Cuando hay filtro
     // Calcula los totales con los productos ya filtrados
     const handleProductosFiltrados = (filtrados) => {
         let totalCompra = 0;
