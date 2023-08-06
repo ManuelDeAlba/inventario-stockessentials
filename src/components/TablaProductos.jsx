@@ -51,14 +51,15 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
         setProductosFiltrados(filtrados);
     }
 
-    const handleBorrar = ({ id, nombre, cantidad, precio_compra, precio_venta }) => {
+    const handleBorrar = ({ id, nombre, cantidad, precio_compra, precio_venta, img }) => {
         abrirModal({
             texto: "¿Quieres borrar el producto?",
             onResult: async (res) => {
                 if(res){
                     await borrarProducto(id);
 
-                    await borrarImagen(id);
+                    // Si existe la imagen, la borra
+                    if(img) await borrarImagen(id);
 
                     await guardarMovimiento(`${usuario.nombre} borró el producto "${nombre}" - cantidad: ${cantidad} - precio_compra: $${precio_compra} - precio_venta: $${precio_venta}`);
                 }
