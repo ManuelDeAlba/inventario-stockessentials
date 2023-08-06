@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, orderBy, query, setDoc, where } from "firebase/firestore";
+import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { obtenerTimestamp } from "./utils";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -19,6 +20,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 //? Utils
 
@@ -91,6 +93,21 @@ export async function actualizarProducto(producto){
 
 export async function borrarProducto(id){
     await borrarDocumento("productos", id);
+}
+
+export async function subirImagen(file, id_producto){
+    const storageRef = ref(storage, `imagenes/img-${id_producto}.png`);
+
+    const snapshot = await uploadBytes(storageRef, file);
+
+    let url = await getDownloadURL(storageRef);
+    return url;
+}
+
+export async function borrarImagen(id_producto){
+    const storageRef = ref(storage, `imagenes/img-${id_producto}.png`);
+
+    await deleteObject(storageRef);
 }
 
 //! Compras
