@@ -98,7 +98,7 @@ function FormularioApartar(){
 
     return(
         <>
-            <h1 className="titulo contenedor">Apartados</h1>
+            <h1 className="titulo contenedor">Apartar productos</h1>
 
             <div className="contenedor">
                 <form className="form" onSubmit={handleSubmit}>

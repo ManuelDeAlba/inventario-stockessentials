@@ -33,7 +33,7 @@ function Navbar(){
 
             <div className="nav__links contenedor">
                 <Link to="/" className="nav__link">Inicio</Link>
-                <Link to="/apartar" className="nav__link">Apartar productos</Link>
+                <Link to="/agregar-producto" className="nav__link">Agregar productos</Link>
                 <Link to="/compras" className="nav__link">Compras</Link>
                 <Link to="/ventas" className="nav__link">Ventas</Link>
                 <Link to="/apartados" className="nav__link">Apartados</Link>

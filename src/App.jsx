@@ -15,6 +15,7 @@ import ModalConfirmProvider from "./context/ModalConfirmProvider";
 import Navbar from "./components/Navbar";
 import PaginaMovimientos from "./pages/PaginaMovimientos";
 import PaginaIngresosEgresos from "./pages/PaginaIngresosEgresos";
+import FormularioProducto from "./components/FormularioProducto";
 
 function App(){
     return(
@@ -25,6 +26,8 @@ function App(){
                         <Navbar />
                         <Routes>
                             <Route path="/" element={<PaginaInicio />} />
+                            <Route path="/agregar-producto" element={<FormularioProducto />} />
+                            <Route path="/editar-producto/:id_producto" element={<FormularioProducto />} />
                             <Route path="/compras" element={<PaginaCompras />} />
                             <Route path="/comprar/:id" element={<FormularioCompra />} />
                             <Route path="/ventas" element={<PaginaVentas />} />

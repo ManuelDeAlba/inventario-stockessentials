@@ -176,6 +176,11 @@ body{
   font-family: 'Tsukimi Rounded', sans-serif;
 }
 .form__input--number{ min-width: 100px; }
+.form__img{
+  width: 50%;
+  max-width: 300px;
+  margin: 20px auto;
+}
 .form__controles{
   display: flex;
   flex-wrap: wrap;
@@ -232,6 +237,7 @@ body{
 .tabla__fila:nth-child(even){ background-color: var(--tabla-registro-secundario); }
 .tabla__fila:hover{ background-color: var(--tabla-registro-hover); }
 .tabla__precio{ text-align: right; }
+.tabla__img{ width: 100%; }
 td:has(.tabla__boton) { padding: 0 5px; } 
 .tabla__boton{
   padding: 5px 10px;

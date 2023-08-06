@@ -8,6 +8,7 @@ import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimien
 import { filtrarElementos, timestampAFecha } from "../utils";
 
 import Filtro from "../components/Filtro";
+import { Link } from "react-router-dom";
 
 function PaginaApartados(){
     const [totales, setTotales] = useState({
@@ -153,6 +154,10 @@ function PaginaApartados(){
     return(
         <>
             <h1 className="titulo contenedor">Apartados</h1>
+
+            <div className="contenedor">
+                <Link to="/apartar" className="boton">Apartar productos</Link>
+            </div>
 
             <div className="contenedor">
                 <Filtro

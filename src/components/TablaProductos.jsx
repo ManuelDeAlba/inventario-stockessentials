@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
 
-import { borrarProducto, guardarMovimiento } from "../firebase";
+import { borrarImagen, borrarProducto, guardarMovimiento } from "../firebase";
 import { filtrarElementos } from "../utils";
 
 import Filtro from "./Filtro";
@@ -58,6 +58,8 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                 if(res){
                     await borrarProducto(id);
 
+                    await borrarImagen(id);
+
                     await guardarMovimiento(`${usuario.nombre} borró el producto "${nombre}" - cantidad: ${cantidad} - precio_compra: $${precio_compra} - precio_venta: $${precio_venta}`);
                 }
 
@@ -101,6 +103,11 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                         </>
                                     )
                                 }
+
+                                {/* CATÁLOGO */}
+                                <th>Categoría</th>
+                                <th>Imagen</th>
+
                                 {
                                     usuario.rol == ROLES.ADMIN && (
                                         <>
@@ -137,6 +144,19 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                                 </>
                                             )
                                         }
+
+                                        {/* CATÁLOGO */}
+                                        <td>{producto.categoria || "-"}</td>
+                                        <td>
+                                            {
+                                                producto.img ? (
+                                                    <img className="tabla__img" src={producto.img} alt={`Imagen de ${producto.nombre}`} />
+                                                ) : (
+                                                    "-"
+                                                )
+                                            }
+                                        </td>
+
                                         {
                                             usuario.rol == ROLES.ADMIN && (
                                                 <>
@@ -175,6 +195,11 @@ function TablaProductos({ productos, handleEditar, conAcciones, conResultados, c
                                                 </>
                                             )
                                         }
+                                        
+                                        {/* CATÁLOGO */}
+                                        <td></td>
+                                        <td></td>
+                                        
                                         {
                                             usuario.rol == ROLES.ADMIN && (
                                                 <>
