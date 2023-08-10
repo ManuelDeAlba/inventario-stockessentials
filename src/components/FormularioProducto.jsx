@@ -7,9 +7,9 @@ function FormularioProducto(){
     const { id_producto } = useParams(); // Para saber si se está editando
     const navigate = useNavigate();
     
-    const [imagen, setImagen] = useState(null);
+    const [imagen, setImagen] = useState(null); // Archivo de imagen para enviar a firebase
     const [eliminarImagen, setEliminarImagen] = useState(false);
-    const [url, setUrl] = useState(null);
+    const [url, setUrl] = useState(null); // Url de la imagen
 
     const [producto, setProducto] = useState({
         id: "",
@@ -57,6 +57,9 @@ function FormularioProducto(){
                 precio_venta: 0,
                 categoria: ""
             });
+            setImagen(null);
+            setEliminarImagen(false);
+            setUrl(null);
         }
     }, [id_producto])
 
