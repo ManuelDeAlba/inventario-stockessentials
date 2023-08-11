@@ -8,6 +8,7 @@ function FormularioProducto(){
     const navigate = useNavigate();
     
     const [imagen, setImagen] = useState(null); // Archivo de imagen para enviar a firebase
+    const [errorImagen, setErrorImagen] = useState(null); // Error al subir un tipo de archivo que no es imagen
     const [eliminarImagen, setEliminarImagen] = useState(false);
     const [url, setUrl] = useState(null); // Url de la imagen
 
@@ -58,6 +59,7 @@ function FormularioProducto(){
                 categoria: ""
             });
             setImagen(null);
+            setErrorImagen(null);
             setEliminarImagen(false);
             setUrl(null);
         }
@@ -140,13 +142,14 @@ function FormularioProducto(){
     }
 
     const handleImagen = async (e) => {
-        if(e.target.files.length == 0){
-            setImagen(null);
-            setUrl(null);
-            return 0;
-        }
+        setErrorImagen(null);
 
         let file = e.target.files[0];
+
+        if(!file.type.startsWith("image/")){
+            setErrorImagen("El archivo tiene que ser una imagen");
+            return;
+        }
 
         // Archivo para subir a la base de datos
         setImagen(file);
@@ -159,6 +162,8 @@ function FormularioProducto(){
         }
 
         reader.readAsDataURL(file);
+
+        e.target.value = null; // Para poder seleccionar la misma foto anterior
     }
 
     const handleBorrarImagen = (e) => {
@@ -226,11 +231,18 @@ function FormularioProducto(){
 
             <div className="form__apartado">
                 <label htmlFor="imagen">Imagen del producto</label>
-                <label className="boton" htmlFor="imagen">
+                <label tabIndex={0} className="boton" htmlFor="imagen" onKeyDown={(e) => {
+                    if(e.code == "Enter") document.activeElement.click();
+                }}>
                     {
                         !url ? "Subir imagen" : "Cambiar imagen"
                     }
                 </label>
+                {
+                    errorImagen && (
+                        <p style={{color: "#f00"}}>{errorImagen}</p>
+                    )
+                }
                 <input
                     type="file"
                     className="form__input"
@@ -238,6 +250,7 @@ function FormularioProducto(){
                     id="imagen"
                     hidden
                     onInput={handleImagen}
+                    accept="image/*"
                     // required
                 />
                 {
