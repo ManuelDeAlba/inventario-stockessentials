@@ -146,6 +146,8 @@ function FormularioProducto(){
 
         let file = e.target.files[0];
 
+        if(!file) return;
+
         if(!file.type.startsWith("image/")){
             setErrorImagen("El archivo tiene que ser una imagen");
             return;
