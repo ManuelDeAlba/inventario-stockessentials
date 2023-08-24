@@ -247,6 +247,9 @@ td:has(.tabla__boton) { padding: 0 5px; }
 }
 .tabla__boton:hover{ background-color: var(--tabla-boton-bg-hover); }
 
+/* APARTADOS */
+.boton__apartar{ width: 100%; }
+
 /* VENTANA MODAL */
 .modal{
   position: fixed;

@@ -149,114 +149,118 @@ function PaginaApartados(){
 
     if(apartados === null) return <h2 className="titulo contenedor">Cargando...</h2>
 
-    if(apartados.length <= 0) return <h2 className="titulo contenedor">No hay productos apartados</h2>
-
     return(
         <>
             <h1 className="titulo contenedor">Apartados</h1>
 
             <div className="contenedor">
-                <Link to="/apartar" className="boton">Apartar productos</Link>
+                <Link to="/apartar" className="boton__apartar boton">Apartar productos</Link>
             </div>
 
-            <div className="contenedor">
-                <Filtro
-                    elementos={apartados}
-                    handleElementosFiltrados={handleApartadosFiltrados}
-                    funcionFiltro={filtrarElementos}
-                />
+            {
+                apartados.length > 0 ? (
+                    <div className="contenedor">
+                        <Filtro
+                            elementos={apartados}
+                            handleElementosFiltrados={handleApartadosFiltrados}
+                            funcionFiltro={filtrarElementos}
+                        />
 
-                {
-                    apartadosFiltrados?.length > 0 ? (
-                        <table className="tabla">
+                        {
+                            apartadosFiltrados?.length > 0 ? (
+                                <table className="tabla">
 
-                            <thead className="tabla__titulos">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Fecha</th>
-                                    <th>Nombre</th>
-                                    <th>Telefono</th>
-                                    <th>Cantidad</th>
-                                    <th>Total sin descuento</th>
-                                    <th>Descuento</th>
-                                    <th>Total</th>
-                                    <th>Ganancia</th>
-                                    <th></th>
-                                    <th></th>
-                                    {
-                                        usuario.rol == ROLES.ADMIN && (
-                                            <>
-                                                <th>Creador</th>
-                                                <th>ID</th>
-                                            </>
-                                        )
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    apartadosFiltrados.map(apartado => (
-                                        <tr className="tabla__fila" key={apartado.id}>
-                                            <td>{apartado.nombre}</td>
-                                            <td>{timestampAFecha(apartado.fecha)}</td>
-                                            <td>{apartado.nombre_persona}</td>
-                                            <td>{apartado.telefono_persona || "-"}</td>
-                                            <td>{apartado.cantidad}</td>
-                                            <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
-                                            <td className="tabla__precio">${apartado.descuento}</td>
-                                            <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta - apartado.descuento}</td>
-                                            <td className="tabla__precio">${(apartado.precio_venta - apartado.precio_compra) * apartado.cantidad - apartado.descuento}</td>
-                                            
-                                            {
-                                                <>
-                                                    <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
-                                                    <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
-                                                </>
-                                            }
-
+                                    <thead className="tabla__titulos">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Fecha</th>
+                                            <th>Nombre</th>
+                                            <th>Telefono</th>
+                                            <th>Cantidad</th>
+                                            <th>Total sin descuento</th>
+                                            <th>Descuento</th>
+                                            <th>Total</th>
+                                            <th>Ganancia</th>
+                                            <th></th>
+                                            <th></th>
                                             {
                                                 usuario.rol == ROLES.ADMIN && (
                                                     <>
-                                                        <td>{apartado.creador || "-"}</td>
-                                                        <td>{apartado.id}</td>
+                                                        <th>Creador</th>
+                                                        <th>ID</th>
                                                     </>
                                                 )
                                             }
                                         </tr>
-                                    ))
-                                }
-                            </tbody>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            apartadosFiltrados.map(apartado => (
+                                                <tr className="tabla__fila" key={apartado.id}>
+                                                    <td>{apartado.nombre}</td>
+                                                    <td>{timestampAFecha(apartado.fecha)}</td>
+                                                    <td>{apartado.nombre_persona}</td>
+                                                    <td>{apartado.telefono_persona || "-"}</td>
+                                                    <td>{apartado.cantidad}</td>
+                                                    <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
+                                                    <td className="tabla__precio">${apartado.descuento}</td>
+                                                    <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta - apartado.descuento}</td>
+                                                    <td className="tabla__precio">${(apartado.precio_venta - apartado.precio_compra) * apartado.cantidad - apartado.descuento}</td>
+                                                    
+                                                    {
+                                                        <>
+                                                            <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
+                                                            <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
+                                                        </>
+                                                    }
 
-                            <tfoot className="tabla__footer">
-                                <tr>
-                                    <td>Total</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td className="tabla__precio">${totales.totalSinDescuento}</td>
-                                    <td className="tabla__precio">${totales.totalDescuentos}</td>
-                                    <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos}</td>
-                                    <td className="tabla__precio">${totales.totalGanancia}</td>
-                                    <td></td>
-                                    <td></td>
-                                    {
-                                        usuario.rol == ROLES.ADMIN && (
-                                            <>
-                                                <td></td>
-                                                <td></td>
-                                            </>
-                                        )
-                                    }
-                                </tr>
-                            </tfoot>
-                        </table>
-                    ) : (
-                        <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
-                    )
-                }
+                                                    {
+                                                        usuario.rol == ROLES.ADMIN && (
+                                                            <>
+                                                                <td>{apartado.creador || "-"}</td>
+                                                                <td>{apartado.id}</td>
+                                                            </>
+                                                        )
+                                                    }
+                                                </tr>
+                                            ))
+                                        }
+                                    </tbody>
 
-            </div>
+                                    <tfoot className="tabla__footer">
+                                        <tr>
+                                            <td>Total</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td className="tabla__precio">${totales.totalSinDescuento}</td>
+                                            <td className="tabla__precio">${totales.totalDescuentos}</td>
+                                            <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos}</td>
+                                            <td className="tabla__precio">${totales.totalGanancia}</td>
+                                            <td></td>
+                                            <td></td>
+                                            {
+                                                usuario.rol == ROLES.ADMIN && (
+                                                    <>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </>
+                                                )
+                                            }
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            ) : (
+                                <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
+                            )
+                        }
+
+                    </div>
+                ) : (
+                    <h2 className="titulo contenedor">No hay productos apartados</h2>
+                )
+            }
         </>
     )
 }
