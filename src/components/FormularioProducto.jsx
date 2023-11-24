@@ -285,6 +285,7 @@ function FormularioProducto(){
                     <option value="sabana">Sábana</option>
                     <option value="almohada">Almohada</option>
                     <option value="cojin">Cojín</option>
+                    <option value="cobertor">Cobertor</option>
                     <option value="otros">Otros</option>
                 </select>
             </div>
