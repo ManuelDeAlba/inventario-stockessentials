@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import { actualizarProducto, guardarApartado, guardarMovimiento, obtenerProductos } from "../firebase";
+import Filtro from "../components/Filtro";
+import { filtrarElementos } from "../utils";
 
 const CLAVES_NO_ITERABLES = ["nombre", "telefono", "descuento"];
 
@@ -11,6 +13,8 @@ function FormularioApartar(){
     const navigate = useNavigate();
 
     const [productos, setProductos] = useState(null);
+    const [productosFiltrados, setProductosFiltrados] = useState([]);
+    const [cantidades, setCantidades] = useState({});
 
     const { usuario } = useAuth();
 
@@ -40,13 +44,14 @@ function FormularioApartar(){
             Por cada producto [id, cantidad_apartada]
         */
         let data = {}
-        for(let [clave, valor] of formData.entries()){
-            // Si son claves no iterables lo agrega a data sin importar nada
-            // Si son iterables excluimos campos vacios o con 0
-            if(!CLAVES_NO_ITERABLES.includes(clave) && (!valor || valor == "0")) continue;
 
-            data[clave] = valor;
-        }
+        data.nombre = formData.get("nombre");
+        data.telefono = formData.get("telefono");
+        data.descuento = formData.get("descuento");
+
+        Object.entries(cantidades).forEach(([id, cantidad]) => {
+            data[id] = cantidad;
+        })
 
         // Por cada producto, guardar el registro de apartado
         for(let [clave, valor] of Object.entries(data)){
@@ -59,7 +64,7 @@ function FormularioApartar(){
                 id_producto: prod.id, // Se guarda el id del producto para poder borrarlo
                 nombre_persona: data.nombre,
                 telefono_persona: data.telefono,
-                cantidad: valor,
+                cantidad: valor.toString(),
                 descuento: Number(data.descuento),
                 precio_compra: prod.precio_compra, // Se guarda para después pasarlo a venta si se completa
                 precio_venta: prod.precio_venta,
@@ -84,6 +89,34 @@ function FormularioApartar(){
         }
     }
 
+    const handleProductosFiltrados = productos => {
+        setProductosFiltrados(productos);
+    }
+
+    const handleCantidad = e => {
+        const id = e.target.name;
+        const value = e.target.value;
+
+        setCantidades(prev => {
+            let prevClone = structuredClone(prev);
+
+            if(value && value != "0") prevClone[id] = Number(value);
+            else delete prevClone[id];
+
+            return prevClone;
+        })
+    }
+
+    const handleCancelar = id => {
+        setCantidades(prev => {
+            let prevClone = structuredClone(prev);
+
+            delete prevClone[id];
+
+            return prevClone;
+        })
+    }
+
     if(!productos) return <h2 className="titulo contenedor">Cargando...</h2>
 
     if(productos.length <= 0) return <h2 className="titulo contenedor">No hay productos</h2>
@@ -94,6 +127,12 @@ function FormularioApartar(){
 
             <div className="contenedor">
                 <form className="form" onSubmit={handleSubmit}>
+                    <Filtro
+                        elementos={productos}
+                        handleElementosFiltrados={handleProductosFiltrados}
+                        funcionFiltro={filtrarElementos}
+                    />
+
                     <table className="tabla">
                         <thead className="tabla__titulos">
                             <tr>
@@ -106,7 +145,7 @@ function FormularioApartar(){
 
                         <tbody>
                             {
-                                productos.map(producto => (
+                                productosFiltrados?.length > 0 && productosFiltrados.map(producto => (
                                     <tr className="tabla__fila" key={producto.id}>
                                         <td>{producto.nombre}</td>
                                         <td>{producto.cantidad}</td>
@@ -119,6 +158,8 @@ function FormularioApartar(){
                                                     className="form__input form__input--number"
                                                     min={0}
                                                     max={producto.cantidad}
+                                                    onInput={handleCantidad}
+                                                    value={cantidades?.[producto.id] || ""}
                                                 />
                                             </td>
                                         }
@@ -165,6 +206,41 @@ function FormularioApartar(){
                             required
                         />
                     </div>
+
+                    {/* Tabla con los productos elegidos */}
+                    {
+                        Object.entries(cantidades).length > 0 && (
+                            <>
+                                <h2 className="titulo">Productos apartados</h2>
+                                <table className="tabla">
+                                    <thead className="tabla__titulos">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Cantidad</th>
+                                            <th>Total</th>
+                                            <th>Cancelar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            Object.entries(cantidades).map(([id, cantidad]) => {
+                                                let prod = productos.filter(producto => producto.id == id)[0];
+
+                                                return(
+                                                    <tr key={id} className="tabla__fila">
+                                                        <td>{prod.nombre}</td>
+                                                        <td>{cantidad}</td>
+                                                        <td className="tabla__precio">${cantidad * prod.precio_venta}</td>
+                                                        <td><button className="boton boton--rojo" style={{display: "block", marginInline: "auto"}} type="button" onClick={() => handleCancelar(prod.id)}>X</button></td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </tbody>
+                                </table>
+                            </>
+                        )
+                    }
 
                     <input type="submit" value="Apartar" className="boton form__boton" />
                 </form>
