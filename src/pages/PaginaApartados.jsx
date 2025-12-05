@@ -19,6 +19,10 @@ function PaginaApartados(){
     });
     const [apartados, setApartados] = useState(null);
     const [apartadosFiltrados, setApartadosFiltrados] = useState(apartados);
+    
+    const [apartadoAbono, setApartadoAbono] = useState(null);
+    const [abonando, setAbonando] = useState(false);
+    const [abono, setAbono] = useState(0);
 
     const { abrirModal, cerrarModal } = useModal();
     const { usuario } = useAuth();
@@ -69,6 +73,39 @@ function PaginaApartados(){
         }
     }, [])
 
+    const handleAbrirModalApartado = (apartado) => {
+        setApartadoAbono(apartado);
+        setAbonando(true);
+    }
+
+    const handleCerrarModalApartado = () => {
+        setApartadoAbono(null);
+        setAbonando(false);
+        setAbono(0);
+    }
+
+    const handleAbonar = async () => {
+        if(abono && !isNaN(abono) && parseFloat(abono) > 0){
+            // Se actualiza el apartado con el nuevo abono
+            let nuevoApartado = {
+                ...apartadoAbono,
+                abono: (apartadoAbono.abono || 0) + parseFloat(abono)
+            }
+            
+            await actualizarApartado(nuevoApartado);
+
+            await guardarTransaccion({
+                descripcion: `Abono de ${nuevoApartado.nombre} ($${parseFloat(abono)})`,
+                dinero: parseFloat(abono),
+                id_apartado: nuevoApartado.id
+            });
+
+            await guardarMovimiento(`${usuario.nombre} guardó el abono de $${parseFloat(abono)} para ${nuevoApartado.nombre} de ${nuevoApartado.nombre_persona} - Total abonado: $${nuevoApartado.abono} de $${nuevoApartado.precio_venta * parseInt(nuevoApartado.cantidad) - nuevoApartado.descuento}`);
+        }
+
+        handleCerrarModalApartado();
+    }
+
     const handleApartadosFiltrados = filtrados => {
         let totalSinDescuento = 0;
         let totalDescuentos = 0;
@@ -89,37 +126,6 @@ function PaginaApartados(){
             totalGanancia
         });
         setApartadosFiltrados(filtrados);
-    }
-
-    const handleAbonar = async (apartado) => {
-        abrirModal({
-            texto: "¿Quieres abonar al apartado?",
-            onResult: async (res) => {
-                if(res){
-                    const abono = prompt("Ingresa la cantidad a abonar:");
-
-                    if(abono && !isNaN(abono) && parseFloat(abono) > 0){
-                        // Se actualiza el apartado con el nuevo abono
-                        let nuevoApartado = {
-                            ...apartado,
-                            abono: (apartado.abono || 0) + parseFloat(abono)
-                        }
-                        
-                        await actualizarApartado(nuevoApartado);
-
-                        await guardarTransaccion({
-                            descripcion: `Abono de ${apartado.nombre} ($${parseFloat(abono)})`,
-                            dinero: parseFloat(abono),
-                            id_apartado: apartado.id
-                        });
-
-                        await guardarMovimiento(`${usuario.nombre} guardó el abono de $${parseFloat(abono)} para ${apartado.nombre} de ${apartado.nombre_persona} - Total abonado: $${nuevoApartado.abono} de $${nuevoApartado.precio_venta * parseInt(nuevoApartado.cantidad) - apartado.descuento}`);
-                    }
-                }
-
-                cerrarModal();
-            }
-        });
     }
 
     const handleCompletar = async (apartado) => {
@@ -197,6 +203,19 @@ function PaginaApartados(){
         <>
             <h1 className="titulo contenedor">Apartados</h1>
 
+            <dialog className="modal--dialog" open={abonando}>
+                <div className="modal__contenedor">
+                    <p className="modal__texto" style={{marginBottom: "2rem"}}>¿Cuanto quieres abonar?</p>
+
+                    <input className="modal--dialog__input" type="number" value={abono} onChange={(e) => setAbono(e.target.value)} />
+
+                    <div className="modal__botones">
+                        <button className="boton boton--verde" onClick={() => handleAbonar()}>Aceptar</button>
+                        <button className="boton boton--rojo" onClick={() => handleCerrarModalApartado()}>Cancelar</button>
+                    </div>
+                </div>
+            </dialog>
+
             <div className="contenedor">
                 <Link to="/apartar" className="boton__apartar boton">Apartar productos</Link>
             </div>
@@ -258,7 +277,7 @@ function PaginaApartados(){
                                                     
                                                     {
                                                         <>
-                                                            <td><button className="tabla__boton boton" onClick={() => handleAbonar(apartado)}>Abonar</button></td>
+                                                            <td><button className="tabla__boton boton" onClick={() => handleAbrirModalApartado(apartado)}>Abonar</button></td>
                                                             <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
                                                             <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
                                                         </>
@@ -308,7 +327,6 @@ function PaginaApartados(){
                                 <h3 className="titulo" style={{marginTop: "20px"}}>Ningún elemento coincide con el filtro</h3>
                             )
                         }
-
                     </div>
                 ) : (
                     <h2 className="titulo contenedor">No hay productos apartados</h2>

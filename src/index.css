@@ -263,6 +263,25 @@ td:has(.tabla__boton) { padding: 0 5px; }
   background-color: rgba(0, 0, 0, .3);
   z-index: 2000;
 }
+.modal--dialog[open]{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, .3);
+  z-index: 2000;
+}
+.modal--dialog__input{
+  display: block;
+  padding: 0.5rem;
+  width: 90%;
+  margin: 0 auto 2rem auto;
+  font-size: 1.2rem;
+}
 /*? Esto funciona solo con react porque no se activa si no se renderiza la ventana (no necesita alguna clase .modal.activa) */
 html:has(.modal){ overflow: hidden; }
 .modal__contenedor{
