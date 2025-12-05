@@ -145,7 +145,7 @@ function PaginaVentas(){
                                     <th>Nombre</th>
                                     <th>Fecha</th>
                                     <th>Cantidad</th>
-                                    <th>Total sin descuento</th>
+                                    <th>Subtotal</th>
                                     <th>Descuento</th>
                                     <th>Total venta</th>
                                     <th>Ganancia</th>

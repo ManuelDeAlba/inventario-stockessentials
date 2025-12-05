@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constantes";
 import { useModal } from "../context/ModalConfirmProvider";
 
-import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto } from "../firebase";
+import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimiento, guardarVenta, obtenerApartados, obtenerProducto, actualizarApartado, borrarTransaccionesConCondicion } from "../firebase";
 import { filtrarElementos, timestampAFecha } from "../utils";
 
 import Filtro from "../components/Filtro";
@@ -14,6 +14,7 @@ function PaginaApartados(){
     const [totales, setTotales] = useState({
         totalSinDescuento: 0,
         totalDescuentos: 0,
+        totalAbonos: 0,
         totalGanancia: 0
     });
     const [apartados, setApartados] = useState(null);
@@ -30,12 +31,14 @@ function PaginaApartados(){
             unsubscribe = await obtenerApartados(async (docs) => {
                 let totalSinDescuento = 0;
                 let totalDescuentos = 0;
+                let totalAbonos = 0;
                 let totalGanancia = 0;
 
                 // Calcular totales
                 let documentos = docs.map(async doc => {
                     totalSinDescuento += doc.precio_venta * doc.cantidad;
                     totalDescuentos += doc.descuento;
+                    totalAbonos += doc.abono || 0;
                     totalGanancia += ((doc.precio_venta - doc.precio_compra) * doc.cantidad) - doc.descuento;
 
                     // El nombre sí lo obtenemos desde el producto porque puede que haya cambiado de nombre
@@ -53,6 +56,7 @@ function PaginaApartados(){
                 setTotales({
                     totalSinDescuento,
                     totalDescuentos,
+                    totalAbonos,
                     totalGanancia
                 });
             });
@@ -68,25 +72,59 @@ function PaginaApartados(){
     const handleApartadosFiltrados = filtrados => {
         let totalSinDescuento = 0;
         let totalDescuentos = 0;
+        let totalAbonos = 0;
         let totalGanancia = 0;
 
         filtrados.forEach(filtrado => {
             totalSinDescuento += filtrado.precio_venta * filtrado.cantidad;
             totalDescuentos += filtrado.descuento;
+            totalAbonos += filtrado.abono || 0;
             totalGanancia += ((filtrado.precio_venta - filtrado.precio_compra) * filtrado.cantidad) - filtrado.descuento;
         })
 
         setTotales({
             totalSinDescuento,
             totalDescuentos,
+            totalAbonos,
             totalGanancia
         });
         setApartadosFiltrados(filtrados);
     }
 
+    const handleAbonar = async (apartado) => {
+        abrirModal({
+            texto: "¿Quieres abonar al apartado?",
+            onResult: async (res) => {
+                if(res){
+                    const abono = prompt("Ingresa la cantidad a abonar:");
+
+                    if(abono && !isNaN(abono) && parseFloat(abono) > 0){
+                        // Se actualiza el apartado con el nuevo abono
+                        let nuevoApartado = {
+                            ...apartado,
+                            abono: (apartado.abono || 0) + parseFloat(abono)
+                        }
+                        
+                        await actualizarApartado(nuevoApartado);
+
+                        await guardarTransaccion({
+                            descripcion: `Abono de ${apartado.nombre} ($${parseFloat(abono)})`,
+                            dinero: parseFloat(abono),
+                            id_apartado: apartado.id
+                        });
+
+                        await guardarMovimiento(`${usuario.nombre} guardó el abono de $${parseFloat(abono)} para ${apartado.nombre} de ${apartado.nombre_persona} - Total abonado: $${nuevoApartado.abono} de $${nuevoApartado.precio_venta * parseInt(nuevoApartado.cantidad) - apartado.descuento}`);
+                    }
+                }
+
+                cerrarModal();
+            }
+        });
+    }
+
     const handleCompletar = async (apartado) => {
         abrirModal({
-            texto: "¿Quieres completar el apartado? (Se registrará como una venta)",
+            texto: "¿Quieres completar el apartado? (Se registrará como una venta y se eliminarán los abonos)",
             onResult: async (res) => {
                 if(res){
                     // Pasar los datos a la venta
@@ -104,6 +142,9 @@ function PaginaApartados(){
                     }
                     
                     let docVenta = await guardarVenta(venta);
+
+                    // Si se completa, se borran los abonos y se deja solamente la venta total
+                    await borrarTransaccionesConCondicion(["id_apartado", "==", apartado.id]);
 
                     await guardarTransaccion({
                         descripcion: `Venta de ${apartado.nombre} (${apartado.cantidad})`,
@@ -124,7 +165,7 @@ function PaginaApartados(){
 
     const handleBorrar = async (apartado) => {
         abrirModal({
-            texto: "¿Quieres borrar el producto apartado? (Se regresarán los productos al inventario)",
+            texto: "¿Quieres borrar el producto apartado? (Se regresarán los productos al inventario y se eliminarán los abonos)",
             onResult: async (res) => {
                 if(res){
                     let producto = await obtenerProducto(apartado.id_producto);
@@ -135,6 +176,9 @@ function PaginaApartados(){
                             cantidad: parseInt(producto.cantidad) + parseInt(apartado.cantidad)
                         });
                     }
+
+                    // Si se cancela, se borran los abonos también
+                    await borrarTransaccionesConCondicion(["id_apartado", "==", apartado.id]);
 
                     // Se borra después para cerrar la ventana modal hasta que desaparezca el apartado
                     await borrarApartado(apartado.id);
@@ -177,10 +221,13 @@ function PaginaApartados(){
                                             <th>Nombre</th>
                                             <th>Telefono</th>
                                             <th>Cantidad</th>
-                                            <th>Total sin descuento</th>
+                                            <th>Subtotal</th>
                                             <th>Descuento</th>
+                                            <th>Abono</th>
                                             <th>Total</th>
+                                            <th>Restante</th>
                                             <th>Ganancia</th>
+                                            <th></th>
                                             <th></th>
                                             <th></th>
                                             {
@@ -204,11 +251,14 @@ function PaginaApartados(){
                                                     <td>{apartado.cantidad}</td>
                                                     <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
                                                     <td className="tabla__precio">${apartado.descuento}</td>
+                                                    <td className="tabla__precio">${apartado.abono || 0}</td>
                                                     <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta - apartado.descuento}</td>
+                                                    <td className="tabla__precio">${(apartado.cantidad * apartado.precio_venta - apartado.descuento) - (apartado.abono || 0)}</td>
                                                     <td className="tabla__precio">${(apartado.precio_venta - apartado.precio_compra) * apartado.cantidad - apartado.descuento}</td>
                                                     
                                                     {
                                                         <>
+                                                            <td><button className="tabla__boton boton" onClick={() => handleAbonar(apartado)}>Abonar</button></td>
                                                             <td><button className="tabla__boton boton" onClick={() => handleCompletar(apartado)}>Completar</button></td>
                                                             <td><button className="tabla__boton boton" onClick={() => handleBorrar(apartado)}>Borrar</button></td>
                                                         </>
@@ -236,8 +286,11 @@ function PaginaApartados(){
                                             <td></td>
                                             <td className="tabla__precio">${totales.totalSinDescuento}</td>
                                             <td className="tabla__precio">${totales.totalDescuentos}</td>
+                                            <td className="tabla__precio">${totales.totalAbonos}</td>
                                             <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos}</td>
+                                            <td className="tabla__precio">${totales.totalSinDescuento - totales.totalDescuentos - totales.totalAbonos}</td>
                                             <td className="tabla__precio">${totales.totalGanancia}</td>
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             {

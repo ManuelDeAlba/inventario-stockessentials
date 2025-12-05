@@ -16,6 +16,8 @@ function FormularioApartar(){
     const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [cantidades, setCantidades] = useState({});
 
+    const [descuento, setDescuento] = useState(0);
+
     const { usuario } = useAuth();
 
     useEffect(() => {
@@ -202,6 +204,8 @@ function FormularioApartar(){
                             id="descuento"
                             min={0}
                             defaultValue={0}
+                            value={descuento}
+                            onChange={e => setDescuento(e.target.value)}
                             inputMode="numeric"
                             required
                         />
@@ -237,6 +241,32 @@ function FormularioApartar(){
                                             })
                                         }
                                     </tbody>
+                                    <tfoot className="tabla__footer">
+                                        <tr>
+                                            <td></td>
+                                            <td>Subtotal:</td>
+                                            <td>
+                                                ${
+                                                    Object.entries(cantidades).map(([id, cantidad]) => productos.filter(producto => producto.id == id)[0]).reduce((acc, prod) => {
+                                                        return acc + (prod.precio_venta * cantidades[prod.id]);
+                                                    }, 0)
+                                                }
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>Total:</td>
+                                            <td>
+                                                ${
+                                                    Object.entries(cantidades).map(([id, cantidad]) => productos.filter(producto => producto.id == id)[0]).reduce((acc, prod) => {
+                                                        return acc + (prod.precio_venta * cantidades[prod.id]);
+                                                    }, 0) - descuento
+                                                }
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </>
                         )
