@@ -8,9 +8,10 @@ import { actualizarProducto, guardarTransaccion, borrarApartado, guardarMovimien
 import { filtrarElementos, timestampAFecha } from "../utils";
 
 import Filtro from "../components/Filtro";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-function PaginaApartados(){
+function PaginaApartadosPersona(){
+    const { nombre_persona } = useParams();
     const [totales, setTotales] = useState({
         totalSinDescuento: 0,
         totalDescuentos: 0,
@@ -55,6 +56,7 @@ function PaginaApartados(){
                 });
 
                 documentos = await Promise.all(documentos);
+                documentos = documentos.filter(doc => doc.nombre_persona == nombre_persona)
 
                 setApartados(documentos);
                 setTotales({
@@ -201,7 +203,7 @@ function PaginaApartados(){
 
     return(
         <>
-            <h1 className="titulo contenedor">Apartados</h1>
+            <h1 className="titulo contenedor">Apartados {nombre_persona.toUpperCase()}</h1>
 
             <dialog className="modal--dialog" open={abonando}>
                 <div className="modal__contenedor">
@@ -217,7 +219,10 @@ function PaginaApartados(){
             </dialog>
 
             <div className="contenedor">
-                <Link to="/apartar" className="boton__apartar boton">Apartar productos</Link>
+                <Link to="/apartados" style={{display:"flex",gap:"0.5rem",alignItems:"center"}}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M5 12h14M5 12l4 4m-4-4 4-4"/></svg>
+                    Regresar a apartados
+                </Link>
             </div>
 
             {
@@ -265,7 +270,7 @@ function PaginaApartados(){
                                                 <tr className="tabla__fila" key={apartado.id}>
                                                     <td>{apartado.nombre}</td>
                                                     <td>{timestampAFecha(apartado.fecha)}</td>
-                                                    <td><Link to={`/apartados/${apartado.nombre_persona}`}>{apartado.nombre_persona}</Link></td>
+                                                    <td><a href={`/apartados/${apartado.id}`}>{apartado.nombre_persona}</a></td>
                                                     <td>{apartado.telefono_persona || "-"}</td>
                                                     <td>{apartado.cantidad}</td>
                                                     <td className="tabla__precio">${apartado.cantidad * apartado.precio_venta}</td>
@@ -336,4 +341,4 @@ function PaginaApartados(){
     )
 }
 
-export default PaginaApartados;
+export default PaginaApartadosPersona;

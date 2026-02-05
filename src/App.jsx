@@ -8,6 +8,7 @@ import PaginaVentas from "./pages/PaginaVentas";
 import AuthProtectedRoute from "./components/AuthProtectedRoute";
 import FormularioApartar from "./pages/FormularioApartar";
 import PaginaApartados from "./pages/PaginaApartados";
+import PaginaApartadosPersona from "./pages/PaginaApartadosPersona";
 
 import AuthProvider from "./context/AuthContext";
 import ModalConfirmProvider from "./context/ModalConfirmProvider";
@@ -34,6 +35,7 @@ function App(){
                             <Route path="/vender/:id" element={<FormularioVenta />} />
                             <Route path="/apartar" element={<FormularioApartar />} />
                             <Route path="/apartados" element={<PaginaApartados />} />
+                            <Route path="/apartados/:nombre_persona" element={<PaginaApartadosPersona />} />
                             <Route path="/movimientos" element={
                                 <AuthProtectedRoute admin>
                                     <PaginaMovimientos />
